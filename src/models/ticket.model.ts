@@ -63,27 +63,30 @@ const CommentSchema = new Schema<IComment>({
 });
 
 const TicketSchema = new Schema<ITicket>({
-  id: { type: Number, required: true },
-  subject: { type: String, required: true },
-  description: { type: String, required: true },
-  type: { type: String, required: true },
-  priority: { type: String, required: true },
-  status: { type: String, required: true },
-  tags: [String],
-  group: { type: Object, required: true },
-  assignee: { type: Object, required: true },
-  organization: { type: Object, default: null },
-  satisfaction_rating: { type: Object, required: true },
-  url: { type: String, required: true },
-  due_at: { type: Date, default: null },
-  created_at: { type: Date, required: true },
-  updated_at: { type: Date, required: true },
-  via: { type: String, required: true },
-  custom_fields: { type: [Object], required: true },
-  requester: { type: UserSchema, required: true },
-  comments: [CommentSchema]
+  id: { type: Number, required: true }, // ID do ticket
+  subject: { type: String, required: true }, // Assunto
+  description: { type: String, required: true }, // Descrição
+  type: { type: String, required: true }, // Tipo de ticket
+  priority: { type: String, required: true }, // Prioridade
+  status: { type: String, required: true }, // Status do ticket
+  tags: [String], // Tags associadas ao ticket
+  group: { type: Object, required: true }, // Grupo responsável
+  assignee: { type: Object, required: true }, // Responsável pela tarefa
+  requester: { type: UserSchema, required: true }, // Solicitante
+
+  // Comentado: Campos que não são essenciais para uma consulta simples
+  // organization: { type: Object, default: null }, // Organização associada ao ticket
+  // satisfaction_rating: { type: Object, required: true }, // Avaliação de satisfação
+  // url: { type: String, required: true }, // URL do ticket
+  // due_at: { type: Date, default: null }, // Data de vencimento
+  // created_at: { type: Date, required: true }, // Data de criação
+  // updated_at: { type: Date, required: true }, // Data de atualização
+  // via: { type: String, required: true }, // Origem do ticket (email, chat, etc)
+  // custom_fields: { type: [Object], required: true }, // Campos personalizados
+
+  comments: [CommentSchema] 
 });
 
 const Ticket = mongoose.model<ITicket>('Ticket', TicketSchema, 'tickets');
 
-export default Ticket; 
+export default Ticket;

@@ -9,14 +9,14 @@ export class TicketRepository extends BaseRepository<ITicket> implements ITicket
 
   async findByIdTicket(id: number): Promise<ITicket | null> {
     const model = this.getModel();  
-    const tickets = await model.find({ id }).lean(); 
+    const tickets = await model.find({ id }).lean().select('id subject description type priority status tags group assignee requester comments'); 
     return tickets.length > 0 ? tickets[0] : null;
   }
 
   async findByRequesterEmail(email: string): Promise<ITicket | null> {
     try {
       const model = this.getModel();  
-      const ticket = await model.findOne({ 'requester.email': email }).lean();
+      const ticket = await model.findOne({ 'requester.email': email }).lean().select('id subject description type priority status tags group assignee requester comments');
       return ticket;  
     } catch (err) {
       throw new Error(`Erro ao buscar o ticket pelo email ${email}: ${err}`);
@@ -26,7 +26,7 @@ export class TicketRepository extends BaseRepository<ITicket> implements ITicket
   async find(filters: any): Promise<ITicket[]> {
     try {
       const model = this.getModel();  
-      return await model.find(filters).lean();  
+      return await model.find(filters).lean().select('id subject description type priority status tags group assignee requester comments');  
     } catch (err) {
       throw new Error(`Erro ao buscar tickets com os filtros: ${err}`);
     }
