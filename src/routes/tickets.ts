@@ -1,9 +1,12 @@
 import { Router } from 'express';
+import { TicketController } from '../controllers/ticket.controller';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Lista de tickets (mock)' });
-});
+const ticketController = new TicketController();
+
+router.get('/', ticketController.getTicketsWithFilters);
+
+router.get('/:id', ticketController.getTicketById);
 
 export default router;
