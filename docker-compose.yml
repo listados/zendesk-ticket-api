@@ -7,4 +7,32 @@ services:
       - "3000:3000"
     volumes:
       - .:/app
-    command: npm run dev
+      - /app/node_modules  # Evita sobrescrever node_modules do container
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/nomedobanco
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=senha
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge

@@ -7,7 +7,7 @@ const {
   MONGODB_URI,           
   DB_USER,               
   DB_PASSWORD,           
-  DB_NAME = 'mydb',      
+  DB_NAME = 'nomedobanco',      
   AUTH_SOURCE = 'admin', 
 } = process.env;
 
