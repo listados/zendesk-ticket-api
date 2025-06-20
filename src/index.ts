@@ -1,60 +1,82 @@
-import express, { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
+import express, {
+  Request,
+  Response,
+  NextFunction,
+  ErrorRequestHandler,
+} from 'express';
 import cors, { CorsOptions } from 'cors';
+import dotenv from 'dotenv';
+import path from 'path';
 import { connectMongo } from './config/mongoose';
 import ticketsRouter from './routes/tickets';
-import path from 'path';
+
+dotenv.config();
 
 const app = express();
 
-const allowedDomain = 'https://www.seudominio.com';
+const allowedDomain = process.env.ALLOWED_DOMAIN || 'https://www.seudominio.com';
+const API_KEY = process.env.API_KEY || 'minha-chave-secreta';
 
-// Configuração do CORS
+const blockInvalidOrigins = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const origin = req.headers.origin;
+  if (origin && origin !== allowedDomain) {
+    res.status(403).json({ message: 'Acesso de domínio não permitido' });
+    return;
+  }
+  next();
+};
+
 const corsOptions: CorsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    console.log('Verificando origem:', origin);  // Log da origem
-
+  origin: (origin, callback) => {
     if (!origin || origin === allowedDomain) {
-      callback(null, true);  // Permite a requisição
+      callback(null, true);
     } else {
-      console.log('Rejeitado domínio não permitido:', origin); // Log do domínio não permitido
-      // Bloqueia a requisição com status 403
-      callback(new Error('Acesso de domínio não permitido'), false);
+      callback(null, false);
     }
   },
 };
 
-// Tipagem do middleware de erro (não retorna nada)
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.error('Erro detectado:', err);  // Log do erro para depuração
-
-  // Se o erro for de CORS, responder com 403
-  if (err.message === 'Acesso de domínio não permitido') {
-    // Apenas envia o status 403 e a mensagem de erro, sem retornar nada
-    res.status(403).json({ message: 'Acesso de domínio não permitido' });
-  } else {
-    // Se o erro não for relacionado ao CORS, passa para o próximo middleware
-    next(err);
+const verifyApiKey = (req: Request, res: Response, next: NextFunction): void => {
+  const key = req.header('X-API-Key');
+  if (!key || key !== API_KEY) {
+    res.status(401).json({ message: 'Chave de API inválida ou ausente' });
+    return;
   }
+  next();
 };
 
-app.use(cors(corsOptions)); // Usando a configuração CORS
+const errorHandler: ErrorRequestHandler = (
+  err,
+  req,
+  res,
+  next
+): void => {
+  console.error('Erro detectado:', err);
+  res.status(500).json({ message: 'Erro interno do servidor' });
+};
+app.use(express.static(path.join(__dirname, '../public')));
+app.use(blockInvalidOrigins);
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use('/tickets', ticketsRouter); // Suas rotas de tickets
-
+app.use(verifyApiKey);
+app.use('/tickets', ticketsRouter);
 app.use(errorHandler);
 
-// Conectando ao MongoDB
 connectMongo();
 
-// Iniciando o servidor HTTP
 const server = app.listen(3000, () =>
   console.log('API rodando em http://localhost:3000')
 );
 
-// Shutdown
 const shutdown = () => {
   console.log('\nShutting down…');
   server.close(() => process.exit(0));
 };
 
 process.on('SIGINT', shutdown).on('SIGTERM', shutdown);
+
+export default app; 
