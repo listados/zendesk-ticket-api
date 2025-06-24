@@ -1,20 +1,22 @@
-version: '3.8'
-
 services:
   api:
     build: .
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"  # Pode remover se for exposto só via proxy
     volumes:
       - .:/app
-      - /app/node_modules  # Evita sobrescrever node_modules do container
+      - /app/node_modules
     environment:
       - NODE_ENV=development
       - MONGO_URI=mongodb://mongo:27017/nomedobanco
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
     depends_on:
       - mongo
     restart: unless-stopped
     networks:
+      - nginx-proxy
       - app-network
 
   mongo:
@@ -36,3 +38,5 @@ volumes:
 networks:
   app-network:
     driver: bridge
+  nginx-proxy:
+    external: true
