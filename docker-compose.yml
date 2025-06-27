@@ -1,8 +1,8 @@
 services:
   api:
     build: .
-    # ports:
-    #   - "3000:3000"  # Pode remover se for exposto só via proxy
+    ports:
+      - "3000:3000"  # Pode remover se for exposto só via proxy
     volumes:
       - .:/app
       - /app/node_modules
@@ -39,4 +39,4 @@ networks:
   app-network:
     driver: bridge
   nginx-proxy:
-    external: true
+    # external: true

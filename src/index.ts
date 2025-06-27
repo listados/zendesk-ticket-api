@@ -42,6 +42,7 @@ const corsOptions: CorsOptions = {
 
 const verifyApiKey = (req: Request, res: Response, next: NextFunction): void => {
   const key = req.header('X-API-Key');
+
   if (!key || key !== API_KEY) {
     res.status(401).json({ message: 'Chave de API inválida ou ausente' });
     return;
